@@ -3,11 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mas4U - פורטל לקוחות</title>
+    <title>Mas4U | פורטל לקוחות</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app-root"></div> 
+
+    <nav class="nav">
+        <div class="nav-brand">
+            <div class="nav-icon">📊</div>
+            <div class="nav-title">
+                Mas4U
+                <div class="nav-sub">הנהלת חשבונות וייעוץ מס</div>
+            </div>
+        </div>
+        <div class="nav-user">
+            <div class="nav-avatar">AD</div>
+            <span class="nav-user-name">אורח יקר</span>
+        </div>
+    </nav>
+
+    <main class="view active" id="main-view">
+        
+        <div class="banner">
+            <div class="banner-top">
+                <div>
+                    <h2>היי, הנה הדוחות שלך</h2>
+                    <p class="banner-sub">עדכון אחרון: היום, 15:30</p>
+                </div>
+                <div class="banner-cid">
+                    <span>מס' לקוח</span>
+                    <strong>8842</strong>
+                </div>
+            </div>
+            <div class="month-status">
+                <div class="ms-dot amber"></div>
+                <div class="ms-text">חודש אפריל ממתין למסמכים שלך</div>
+                <button class="ms-action">לדיווח מהיר</button>
+            </div>
+        </div>
+
+        <div class="handler-chip">
+            <div class="handler-avatar">ש</div>
+            <div class="handler-info">
+                <div class="handler-lbl">רואה חשבון מטפל</div>
+                <div class="handler-name">שמעון דורית</div>
+            </div>
+            <a href="https://wa.me/972500000000" class="wa-btn">
+                <span>WhatsApp</span>
+            </a>
+        </div>
+
+        <div class="chart-ctx">
+            <div class="ctx-chip inc">
+                <div class="ctx-val">₪12,450</div>
+                <div class="ctx-lbl">הכנסות</div>
+            </div>
+            <div class="ctx-chip exp">
+                <div class="ctx-val">₪3,120</div>
+                <div class="ctx-lbl">הוצאות</div>
+            </div>
+            <div class="ctx-chip net">
+                <div class="ctx-val">₪9,330</div>
+                <div class="ctx-lbl">רווח נקי</div>
+            </div>
+        </div>
+
+        <div class="month-bar">
+            <div class="mpill">ינו׳</div>
+            <div class="mpill">פבר׳</div>
+            <div class="mpill has-docs">מרץ</div>
+            <div class="mpill active">אפר׳</div>
+            <div class="mpill locked">מאי</div>
+        </div>
+
+        <div class="upload-section">
+            <button class="camera-btn">
+                <span>📸 צלם קבלה או חשבונית</span>
+                <input type="file" accept="image/*" capture="environment" multiple onchange="App.handleUpload(this.files)">
+            </button>
+            
+            <div class="upload-zone">
+                <input type="file" multiple onchange="App.handleUpload(this.files)">
+                <div class="upload-inner">
+                    <div class="upload-icon">📁</div>
+                    <div class="fname">לחץ כאן לבחירת קבצים מהגלריה</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="file-list-container"></div>
+
+    </main>
+
+    <div class="nav-tabs">
+        <button class="nav-tab active">
+            <span>דף הבית</span>
+        </button>
+        <button class="nav-tab">
+            <span>מסמכים</span>
+        </button>
+        <button class="nav-tab">
+            <span>הגדרות</span>
+        </button>
+    </div>
+
+    <div class="sticky-bar" id="sticky-bar">
+        <button class="submit-btn" onclick="App.submitToCRM()">
+            שלח מסמכים למשרד
+        </button>
+    </div>
+
+    <button class="a11y-widget-btn" onclick="document.querySelector('.a11y-menu').classList.toggle('show')">♿</button>
+    <div class="a11y-menu">
+        <button onclick="document.body.classList.toggle('a11y-high-contrast')">ניגודיות גבוהה</button>
+        <button onclick="document.documentElement.style.setProperty('--font-multiplier', 1.2)">הגדל טקסט</button>
+        <button onclick="document.documentElement.style.setProperty('--font-multiplier', 1)">טקסט רגיל</button>
+    </div>
 
     <script src="app.js"></script>
 </body>

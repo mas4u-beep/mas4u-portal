@@ -1,42 +1,35 @@
 /**
- * mas4u Client Portal - Engine v7.0
- * Optimized for Speed & Future CRM Integration
+ * mas4u Client Portal - Final Production Engine
+ * Includes Full UI Rendering, State Management & CRM Sync Simulation
  */
 
 const App = {
-    // 1. נתונים בסיסיים (State)
+    // 1. נתונים בסיסיים
     state: {
-        user: { name: "משתמש בדיקה", id: "12345" },
-        activeMonth: new Date().getMonth() + 1,
-        files: [], // קבצים שממתינים לשליחה
+        user: { name: "אורח יקר", id: "8842" },
+        files: [], // הקבצים של המשתמש
         isSyncing: false
     },
 
-    // 2. אתחול המערכת
+    // 2. אתחול המערכת בטעינת הדף
     init() {
         this.loadDraft();
         this.render();
-        console.log("System Initialized");
-        
-        // האזנה לכפתור השליחה הראשי
-        const submitBtn = document.querySelector('.submit-btn');
-        if (submitBtn) {
-            submitBtn.addEventListener('click', () => this.submitToCRM());
-        }
+        console.log("System Ready & Loaded");
     },
 
-    // 3. ניהול קבצים והעלאה מהירה (חוויית משתמש)
+    // 3. טיפול בהעלאת קבצים / צילום מהמצלמה
     async handleUpload(fileList) {
-        // רטט קטן בנייד לתחושת לחיצה
-        if (window.navigator.vibrate) window.navigator.vibrate(10);
+        // רטט קל בסמארטפון לתחושת תגובתיות
+        if (window.navigator.vibrate) window.navigator.vibrate(15);
         
         for (let file of fileList) {
-            const fileId = Date.now() + Math.random();
+            const fileId = 'file_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
             
-            // יצירת אובייקט זמני להצגה מיידית
+            // יצירת הקובץ במצב "טעינה"
             const newFile = {
                 id: fileId,
-                name: file.name,
+                name: file.name || "מסמך מצולם",
                 status: 'processing', 
                 amount: '',
                 category: '',
@@ -44,9 +37,9 @@ const App = {
             };
 
             this.state.files.push(newFile);
-            this.render(); 
+            this.render(); // ציור מיידי על המסך
 
-            // עיבוד התמונה (כיווץ) ברקע
+            // כיווץ התמונה מאחורי הקלעים לחיסכון במקום ומהירות
             this.compressImage(file, (compressedData) => {
                 const index = this.state.files.findIndex(f => f.id === fileId);
                 if (index !== -1) {
@@ -59,7 +52,26 @@ const App = {
         }
     },
 
-    // פונקציית עזר לכיווץ תמונה
+    // 4. עדכון פרטי מסמך (סכום / קטגוריה)
+    updateFile(id, field, value) {
+        const file = this.state.files.find(f => f.id === id);
+        if (file) {
+            file[field] = value;
+            this.saveDraft();
+            this.render();
+        }
+    },
+
+    // מחיקת מסמך
+    deleteFile(id) {
+        if(confirm("למחוק מסמך זה?")) {
+            this.state.files = this.state.files.filter(f => f.id !== id);
+            this.saveDraft();
+            this.render();
+        }
+    },
+
+    // פונקציית כיווץ תמונות (שומר על חבילת הגלישה של הלקוח)
     compressImage(file, callback) {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -68,7 +80,7 @@ const App = {
             img.src = event.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 1200;
+                const MAX_WIDTH = 800; // מוקטן למהירות שיא
                 let width = img.width;
                 let height = img.height;
 
@@ -82,52 +94,47 @@ const App = {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
                 
-                // החזרת התמונה המכווצת בפורמט Base64
-                callback(canvas.toDataURL('image/jpeg', 0.7));
+                callback(canvas.toDataURL('image/jpeg', 0.6));
             };
         };
     },
 
-    // 4. וולידציה (בדיקה שהכל מולא)
-    validateFile(id) {
-        const file = this.state.files.find(f => f.id === id);
-        return file && file.amount > 0 && file.category !== '';
-    },
-
-    // 5. סימולציית CRM (הכנה לעתיד)
+    // 5. שליחה ל-CRM
     async submitToCRM() {
-        const readyFiles = this.state.files.filter(f => f.amount > 0 && f.category !== '');
+        // בודק אם כל הקבצים מולאו כראוי
+        const validFiles = this.state.files.filter(f => f.amount > 0 && f.category !== '');
         
-        if (readyFiles.length === 0) {
-            alert("נא למלא סכום וקטגוריה לפחות למסמך אחד");
+        if (validFiles.length === 0 || validFiles.length !== this.state.files.length) {
+            alert("שים לב: יש למלא סכום וקטגוריה עבור כל המסמכים לפני השליחה.");
             return;
         }
 
         this.state.isSyncing = true;
         this.render();
 
-        // דימוי קריאת שרת (API)
         try {
+            // דימוי של שרת שעובד (2 שניות)
             await new Promise(resolve => setTimeout(resolve, 2000));
             
-            // הסרת הקבצים שנשלחו מהרשימה
-            this.state.files = this.state.files.filter(f => !readyFiles.includes(f));
+            this.state.files = []; // ריקון הרשימה אחרי הצלחה
             this.saveDraft();
-            alert("המסמכים נשלחו בהצלחה למשרד!");
+            
+            // יצירת קונפטי או הודעת הצלחה יפה (כרגע Alert)
+            alert("המסמכים הועלו בהצלחה ונקלטו במשרד!");
         } catch (err) {
-            alert("שגיאה בסנכרון. הנתונים נשמרו בטיוטה.");
+            alert("תקלה ברשת. הנתונים שמורים, נסה שוב מאוחר יותר.");
         } finally {
             this.state.isSyncing = false;
             this.render();
         }
     },
 
-    // 6. ניהול טיוטה (LocalStorage)
+    // 6. שמירה לזיכרון הדפדפן (למקרה שהאפליקציה נסגרת בטעות)
     saveDraft() {
         try {
             localStorage.setItem('mas4u_draft', JSON.stringify(this.state.files));
         } catch (e) {
-            console.error("Storage full");
+            console.warn("Storage full, unable to save draft.");
         }
     },
 
@@ -136,21 +143,68 @@ const App = {
         if (draft) this.state.files = JSON.parse(draft);
     },
 
-    // 7. עדכון ה-UI
+    // 7. המנוע הויזואלי - מצייר את הממשק מחדש אחרי כל שינוי
     render() {
-        const container = document.getElementById('app-root');
+        const container = document.getElementById('file-list-container');
+        const stickyBar = document.getElementById('sticky-bar');
+        const submitBtn = document.querySelector('.submit-btn');
+
         if (!container) return;
 
-        // כאן תבוא הפונקציה שבונה את ה-HTML של כרטיסיות הקבצים
-        // (בשלב הבא נוכל להכניס כאן את ה-Template המלא)
-        console.log("Current Files:", this.state.files);
-        
-        // עדכון סטטוס כפתור השליחה
-        const submitBtn = document.querySelector('.submit-btn');
+        // ציור הקבצים
+        container.innerHTML = ''; 
+        const categories = ['הכנסה', 'הוצאה', 'קופה קטנה'];
+
+        this.state.files.forEach(file => {
+            const isProc = file.status === 'processing';
+            
+            // בניית הקטגוריות
+            const catsHtml = categories.map(cat => 
+                `<div class="cpill ${file.category === cat ? 'sel' : ''}" 
+                      onclick="${!isProc ? `App.updateFile('${file.id}', 'category', '${cat}')` : ''}">
+                    ${cat}
+                </div>`
+            ).join('');
+
+            // יצירת הכרטיסייה
+            const card = document.createElement('div');
+            card.className = `file-card ${isProc ? 'processing' : ''}`;
+            
+            card.innerHTML = `
+                <button class="del-btn" onclick="App.deleteFile('${file.id}')" ${isProc ? 'style="display:none"' : ''}>✕</button>
+                <div class="fthumb">
+                    ${file.preview ? `<img src="${file.preview}" alt="doc">` : ''}
+                </div>
+                <div class="fbody">
+                    <div class="fname">${file.name}</div>
+                    <div class="amt-row">
+                        <span style="font-weight:900; color:var(--muted)">₪</span>
+                        <input type="number" placeholder="0.00" value="${file.amount}" 
+                               oninput="App.updateFile('${file.id}', 'amount', this.value)"
+                               ${isProc ? 'disabled' : ''}>
+                    </div>
+                    <div class="cat-pills">
+                        ${catsHtml}
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        // שליטה על בר השליחה התחתון (מופיע רק כשיש קבצים)
+        if (stickyBar) {
+            if (this.state.files.length > 0) {
+                stickyBar.classList.add('show');
+            } else {
+                stickyBar.classList.remove('show');
+            }
+        }
+
+        // שינוי כפתור בזמן שליחה
         if (submitBtn) {
             if (this.state.isSyncing) {
                 submitBtn.classList.add('loading');
-                submitBtn.innerText = "שולח ל-CRM...";
+                submitBtn.innerText = "מעביר נתונים למשרד...";
             } else {
                 submitBtn.classList.remove('loading');
                 submitBtn.innerText = "שלח מסמכים למשרד";
@@ -159,5 +213,5 @@ const App = {
     }
 };
 
-// הפעלת האפליקציה בטעינה
+// הפעלת האפליקציה בטעינת הדף
 document.addEventListener('DOMContentLoaded', () => App.init());
